@@ -5,6 +5,11 @@ let users = [
 
 let nextId = 3;
 
+    const isValidEmail = email => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
 const userService = {
   getAllUsers: () => {
     return [...users];
@@ -15,28 +20,34 @@ const userService = {
   },
 
   createUser: (name, email) => {
-    if (!name || !email) {
-      throw new Error('Name and email are required');
-    }
+  if (!name || !email) {
+    throw new Error('Name and email are required');
+  }
 
-    if (!email.includes('@')) {
-      throw new Error('Invalid email format');
-    }
+  const normalizedEmail = email.trim().toLowerCase();
 
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
-      throw new Error('User with this email already exists');
-    }
+  if (!isValidEmail(normalizedEmail)) {
+    throw new Error('Invalid email format');
+  }
 
-    const newUser = {
-      id: nextId++,
-      name: name.trim(),
-      email: email.trim().toLowerCase()
-    };
+  const existingUser = users.find(
+    user => user.email === normalizedEmail
+  );
 
-    users.push(newUser);
-    return newUser;
-  },
+  if (existingUser) {
+    throw new Error('User with this email already exists');
+  }
+
+  const newUser = {
+    id: nextId++,
+    name: name.trim(),
+    email: normalizedEmail
+  };
+
+  users.push(newUser);
+  return newUser;
+},
+
 
   updateUser: (id, updates) => {
     const userIndex = users.findIndex(user => user.id === parseInt(id, 10));
