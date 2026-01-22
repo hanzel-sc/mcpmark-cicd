@@ -50,18 +50,35 @@ const userService = {
 
 
   updateUser: (id, updates) => {
-    const userIndex = users.findIndex(user => user.id === parseInt(id, 10));
-    if (userIndex === -1) {
-      throw new Error('User not found');
-    }
+  const userIndex = users.findIndex(user => user.id === parseInt(id, 10));
+  if (userIndex === -1) {
+    throw new Error('User not found');
+  }
 
-    if (updates.email && !updates.email.includes('@')) {
+  if (updates.email) {
+    const normalizedEmail = updates.email.trim().toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
       throw new Error('Invalid email format');
     }
 
-    users[userIndex] = { ...users[userIndex], ...updates };
-    return users[userIndex];
-  },
+    const emailExists = users.some(
+      user =>
+        user.email === normalizedEmail &&
+        user.id !== parseInt(id, 10)
+    );
+
+    if (emailExists) {
+      throw new Error('User with this email already exists');
+    }
+
+    updates.email = normalizedEmail;
+  }
+
+  users[userIndex] = { ...users[userIndex], ...updates };
+  return users[userIndex];
+},
+
 
   deleteUser: id => {
     const userIndex = users.findIndex(user => user.id === parseInt(id, 10));
